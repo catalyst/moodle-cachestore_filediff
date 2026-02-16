@@ -8,24 +8,11 @@ class cachestore_deltagibbon extends store implements cache_is_key_aware {
     /** @var string */
     protected $path;
 
-    /** @var int */
-    protected $missinterval;
-
-    /** @var array */
-    protected $readcounts = [];
-
     protected $definition;
 
     public function __construct($name, array $configuration = []) {
         parent::__construct($name, $configuration);
 
-        global $CFG;
-
-        $this->missinterval = 3;
-
-        if (!empty($configuration['missinterval'])) {
-            $this->missinterval = (int)$configuration['missinterval'];
-        }
 
     }
     public function my_name() {
@@ -94,28 +81,46 @@ class cachestore_deltagibbon extends store implements cache_is_key_aware {
             return false;
         }
 
-        // Simulate forced miss every N reads.
-        // $this->readcounts[$key] = ($this->readcounts[$key] ?? 0) + 1;
-        //
-        // if ($this->missinterval > 0 &&
-        //     $this->readcounts[$key] % $this->missinterval === 0) {
-        //
-        //     debugging("deltagibbon: Forced miss for key {$key}", DEBUG_DEVELOPER);
-        //     return false;
-        // }
+        // TODO we will simulate cache misses and we'll store the current
+        // version as a new file so its easy to diff, and then wait for
+        // the newly rebuild version to come through. Then we'll check if
+        // they are exactly binary compatible and if they are not then we
+        // have found a cache corruption and we are not invalidating enough!
 
-// echo '<pre>';
-// var_dump($data['value']);
-// die;
+        // When this happens weneed to simulate clearing everything! Not just
+        // one key.
+
 
         return unserialize($data['value']);
     }
 
+    function ksort(&$array) {
+        if (!is_array($array)) {
+            return;
+        }
+
+        foreach ($array as &$value) {
+            if (is_array($value)) {
+                $this->ksort($value);
+            }
+        }
+
+        if (array_keys($array) !== range(0, count($array) - 1)) {
+            ksort($array); // sort associative keys only
+        }
+    }
 
     public function set($key, $value) {
 
         $file = $this->keypath($key);
         $data = $this->readfile($file);
+
+        $json = json_decode(json_encode($value), true);
+        $this->ksort($json);
+
+        // TODO this is where we would check if the value currently
+        // stored is actually the same as this. Which suggests we are
+        // rebuilding more than we should be.
 
         if (!$data) {
             $data = [
@@ -123,7 +128,7 @@ class cachestore_deltagibbon extends store implements cache_is_key_aware {
                     'key'       => $key,
                     'created'   => time(),
                 ],
-                'json'  => $value,
+                'json'  => $json,
                 'value' => serialize($value),
             ];
         }
