@@ -22,9 +22,17 @@ class cachestore_deltagibbon extends store implements cache_is_key_aware {
     public function initialise(definition $definition) {
         global $CFG;
         $this->definition = $definition;
-        $hash = preg_replace('#[^a-zA-Z0-9]+#', '_', $this->definition->get_id());
+        $defid = preg_replace('#[^a-zA-Z0-9]+#', '_', $this->definition->get_id());
 
-        $this->path = $CFG->dataroot . '/deltagibbon/' . $hash;
+        $cfg = get_config('cachestore_deltagibbon');
+        if (empty($cfg->snapshot)) {
+            $snapshot = 1;
+            set_config('snapshot', $snapshot, 'cachestore_deltagibbon');
+        } else {
+            $snapshot = $cfg->snapshot;
+        }
+
+        $this->path = "$CFG->dataroot/deltagibbon/$defid/$snapshot";
         if (!is_dir($this->path)) {
             mkdir($this->path, 0777, true);
         }
@@ -122,14 +130,16 @@ class cachestore_deltagibbon extends store implements cache_is_key_aware {
         // stored is actually the same as this. Which suggests we are
         // rebuilding more than we should be.
 
+        $backtrace = debug_backtrace();
+
         if (!$data) {
             $data = [
                 "metadata" => [
                     'key'       => $key,
-                    'created'   => time(),
+                    'backtrace' => explode("\n", trim(format_backtrace($backtrace, true))),
                 ],
-                'json'  => $json,
-                'value' => serialize($value),
+                'json'      => $json,
+                'value'     => serialize($value),
             ];
         }
 
@@ -140,7 +150,7 @@ class cachestore_deltagibbon extends store implements cache_is_key_aware {
 
     public function delete($key) {
 
-        debugging('Never delete! Never surrender!');
+        debugging("Never delete! Never surrender! Key = $key");
         // throw new moodle_exception('Never delete! Never surrender!');
 
     }
@@ -152,9 +162,16 @@ class cachestore_deltagibbon extends store implements cache_is_key_aware {
     }
 
     public function purge() {
+        // Ha! Thats what you think...
+        // We'll keep the old files to compare.
 
-        foreach (glob($this->path . '/*.json') as $file) {
-            unlink($file);
+        $cfg = get_config('cachestore_deltagibbon');
+        if (empty($cfg->snapshot)) {
+            $snapshot = 1;
+            set_config('snapshot', $snapshot, 'cachestore_deltagibbon');
+        } else {
+            $snapshot = $cfg->snapshot + 1;
+            set_config('snapshot', $snapshot, 'cachestore_deltagibbon');
         }
 
         return true;
