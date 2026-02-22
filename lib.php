@@ -3,7 +3,7 @@
 use core_cache\store;
 use core_cache\definition;
 
-class cachestore_deltagibbon extends store implements cache_is_key_aware {
+class cachestore_filediff extends store implements cache_is_key_aware {
 
     /** @var string */
     protected $path;
@@ -24,15 +24,15 @@ class cachestore_deltagibbon extends store implements cache_is_key_aware {
         $this->definition = $definition;
         $defid = preg_replace('#[^a-zA-Z0-9]+#', '_', $this->definition->get_id());
 
-        $cfg = get_config('cachestore_deltagibbon');
+        $cfg = get_config('cachestore_filediff');
         if (empty($cfg->snapshot)) {
             $snapshot = 1;
-            set_config('snapshot', $snapshot, 'cachestore_deltagibbon');
+            set_config('snapshot', $snapshot, 'cachestore_filediff');
         } else {
             $snapshot = $cfg->snapshot;
         }
 
-        $this->path = "$CFG->dataroot/deltagibbon/$defid/$snapshot";
+        $this->path = "$CFG->dataroot/filediff/$defid/$snapshot";
         if (!is_dir($this->path)) {
             mkdir($this->path, 0777, true);
         }
@@ -165,13 +165,13 @@ class cachestore_deltagibbon extends store implements cache_is_key_aware {
         // Ha! Thats what you think...
         // We'll keep the old files to compare.
 
-        $cfg = get_config('cachestore_deltagibbon');
+        $cfg = get_config('cachestore_filediff');
         if (empty($cfg->snapshot)) {
             $snapshot = 1;
-            set_config('snapshot', $snapshot, 'cachestore_deltagibbon');
+            set_config('snapshot', $snapshot, 'cachestore_filediff');
         } else {
             $snapshot = $cfg->snapshot + 1;
-            set_config('snapshot', $snapshot, 'cachestore_deltagibbon');
+            set_config('snapshot', $snapshot, 'cachestore_filediff');
         }
 
         return true;

@@ -17,7 +17,7 @@ The things it does differently is:
 2) It stores everything under a snapshot, and the snapshot can be easily
    bumped manually by:
 
-   php admin/cli/cfg.php --component=cachestore_deltagibbon --name=snapshot --set=2
+   php admin/cli/cfg.php --component=cachestore_filediff --name=snapshot --set=2
 
    This snapshot is also bumped when the cache definition is purged.
 
@@ -37,15 +37,15 @@ a) If you are making a small targeted change, lets say you are toggling
 
 ```
 # Reset all snapshots:
-php public/cache/stores/deltagibbon/cli/reset.php
+php public/cache/stores/filediff/cli/reset.php
 
 # Load a course...
 
-cd /var/lib/sitedata/deltagibbon/core_coursemodinfo
+cd /var/lib/sitedata/filediff/core_coursemodinfo
 # Find files under /1/
 
 # Make a new snapshot:
-php public/cache/stores/deltagibbon/cli/snapshot.php
+php public/cache/stores/filediff/cli/snapshot.php
 
 # Load a course...
 # Find files under /2/

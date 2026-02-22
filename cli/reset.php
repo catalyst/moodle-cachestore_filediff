@@ -6,6 +6,6 @@ require(__DIR__.'/../../../../config.php');
 require_once($CFG->libdir.'/clilib.php');
 
 cli_heading("Reset all snapshots");
-fulldelete("$CFG->dataroot/deltagibbon/");
+fulldelete("$CFG->dataroot/filediff/");
 
-unset_config('snapshot', 'cachestore_deltagibbon');
+unset_config('snapshot', 'cachestore_filediff');
