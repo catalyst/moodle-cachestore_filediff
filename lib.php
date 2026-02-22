@@ -76,7 +76,7 @@ class cachestore_deltagibbon extends store implements cache_is_key_aware {
     protected function writefile($file, array $data) {
         file_put_contents(
             $file,
-            json_encode($data, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES)
+            json_encode($data, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES) . "\n"
         );
     }
 

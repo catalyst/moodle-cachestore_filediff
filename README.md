@@ -35,8 +35,33 @@ a) If you are making a small targeted change, lets say you are toggling
    the same. All version numbers and time stamps and everything should be
    binary identical. If they are not then there is a bug somewhere.
 
+```
+# Reset all snapshots:
+php public/cache/stores/deltagibbon/cli/reset.php
+
+# Load a course...
+
+cd /var/lib/sitedata/deltagibbon/core_coursemodinfo
+# Find files under /1/
+
+# Make a new snapshot:
+php public/cache/stores/deltagibbon/cli/snapshot.php
+
+# Load a course...
+# Find files under /2/
+
+# Recursive diff of snapshots:
+diff -r --color=always --ignore-matching-lines=version_wrapper *
+```
+
 b) On the flip side, if you are doing a small change like above, and then
    invalidating too much then while it may be correct it is also inneficient.
    So we want to easily be able to see any cache values which have been
-   set when they should not have been set.
+   set when they should not have been set. So in this case we want to clone
+   the cache so its still warm, and then change something.
+
+TBA create clone cli
+
+
+
 
