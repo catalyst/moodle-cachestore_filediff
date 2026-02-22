@@ -32,9 +32,12 @@ class cachestore_filediff extends store implements cache_is_key_aware {
             $snapshot = $cfg->snapshot;
         }
 
-        $this->path = "$CFG->dataroot/filediff/$defid/$snapshot";
+        $this->path = "$CFG->dataroot/cache-filediff/$defid/$snapshot";
         if (!is_dir($this->path)) {
             mkdir($this->path, 0777, true);
+        }
+        if (!is_dir($this->path)) {
+            throw new moodle_exception('cannot create filedir dir');
         }
     }
 
