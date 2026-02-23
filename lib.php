@@ -12,11 +12,10 @@ class cachestore_filediff extends store implements cache_is_key_aware {
 
     public function __construct($name, array $configuration = []) {
         parent::__construct($name, $configuration);
-
-
     }
+
     public function my_name() {
-        return 'Delta gibbon';
+        return 'filediff';
     }
 
     public function initialise(definition $definition) {
@@ -124,7 +123,6 @@ class cachestore_filediff extends store implements cache_is_key_aware {
     public function set($key, $value) {
 
         $file = $this->keypath($key);
-        $data = $this->readfile($file);
 
         $json = json_decode(json_encode($value), true);
         $this->ksort($json);
@@ -135,16 +133,14 @@ class cachestore_filediff extends store implements cache_is_key_aware {
 
         $backtrace = debug_backtrace();
 
-        if (!$data) {
-            $data = [
-                "metadata" => [
-                    'key'       => $key,
-                    'backtrace' => explode("\n", trim(format_backtrace($backtrace, true))),
-                ],
-                'json'      => $json,
-                'value'     => serialize($value),
-            ];
-        }
+        $data = [
+            "metadata" => [
+                'key'       => $key,
+                'backtrace' => explode("\n", trim(format_backtrace($backtrace, true))),
+            ],
+            'json'      => $json,
+            'value'     => serialize($value),
+        ];
 
         $this->writefile($file, $data);
 
@@ -153,10 +149,12 @@ class cachestore_filediff extends store implements cache_is_key_aware {
 
     public function delete($key) {
 
-        debugging("Never delete! Never surrender! Key = $key");
+        // debugging("Never delete! Never surrender! Key = $key");
+        $this->set($key, false);
         // throw new moodle_exception('Never delete! Never surrender!');
-
+        return true;
     }
+
     public function delete_many(array $keys) {
         foreach ($keys as $key) {
             $this->delete($key);
@@ -183,8 +181,13 @@ class cachestore_filediff extends store implements cache_is_key_aware {
     public function has($key) {
         $file = $this->keypath($key);
         $data = $this->readfile($file);
-        return !empty($data['current']);
+
+        if (!$data || empty($data['value'])) {
+            return false;
+        }
+        return true;
     }
+
     public function has_any(array $keys) {
         foreach ($keys as $key) {
             if ($this->has($key)) {
