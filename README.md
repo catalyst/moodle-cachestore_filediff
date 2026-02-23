@@ -51,7 +51,7 @@ php public/cache/stores/filediff/cli/snapshot.php
 # Find files under /2/
 
 # Recursive diff of snapshots:
-diff -r --color=always --ignore-matching-lines=version_wrapper *
+diff -r --color=always --ignore-matching-lines=version_wrapper --ignore-matching-lines=' line' 1 2
 ```
 
 b) On the flip side, if you are doing a small change like above, and then
